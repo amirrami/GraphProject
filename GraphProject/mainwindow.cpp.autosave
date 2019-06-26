@@ -184,7 +184,7 @@ void MainWindow::runAlgorithmPressed()
         betweennessCenter centralityAlgorithm(adjacencyMatrix,adjacencyList,numberOfEdges);
         centrality.resize(numberOfNodes);
         centralityAlgorithm.getCentrality(centrality);
-
+        
 
     }
 }

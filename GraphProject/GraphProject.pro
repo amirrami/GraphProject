@@ -26,10 +26,22 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    graphics.cpp \
+    node.cpp \
+    edge.cpp \
+    degreecenter.cpp \
+    closenesscenter.cpp \
+    betweennesscenter.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    graphics.h \
+    node.h \
+    edge.h \
+    degreecenter.h \
+    closenesscenter.h \
+    betweennesscenter.h
 
 FORMS += \
         mainwindow.ui
