@@ -59,7 +59,7 @@
 
 //! [0]
 Graphics::Graphics(QWidget *parent)
-    : QGraphicsView(parent), timerId(0)
+     : QGraphicsView(new QGraphicsScene, parent), timerId(0)
 {
     this->setMouseTracking(true);
     this->setBackgroundRole(QPalette::Base);
@@ -74,31 +74,123 @@ Graphics::Graphics(QWidget *parent)
     this->setRenderHint(QPainter::Antialiasing);
     this->setTransformationAnchor(AnchorUnderMouse);
     this->scale(qreal(0.8), qreal(0.8));
-    this->setMinimumSize(400, 400);
+    this->setMinimumSize(650, 650);
 //! [0]
 
 //! [1]
-    Node *node1 = new Node(this);
-    Node *node2 = new Node(this);
-    Node *node3 = new Node(this);
-    Node *node4 = new Node(this);
 
-    scene->addItem(node1);
-    scene->addItem(node2);
-    scene->addItem(node3);
-
-
-    scene->addItem(new Edge(node1, node2));
-    scene->addItem(new Edge(node2, node3));
-
-
-
-    node1->setPos(0, 0);
-    node2->setPos(100, 100);
-    node3->setPos(200, 200);
 
 }
 //! [1]
+//!
+void Graphics::drawNodes(QVector<QList<QPair<int, float> > > adjacencyList, QVector<float> centrality, QString algorithm)
+{
+    // adjust graphical centrality
+
+    float max=0;
+    for(int i=0;i<centrality.size();i++){
+        if(centrality[i]>max)
+            max=centrality[i];
+    }
+
+    graphicsCentrality.resize(centrality.size());
+    if(algorithm == "Degree Centrality"){
+        for(int i=0;i<centrality.size();i++){
+            if(centrality.size()<=10){
+                graphicsCentrality[i] = centrality[i]* 10;
+            }
+            else if (centrality.size() >10 && centrality.size() <=20) {
+                graphicsCentrality[i] = centrality[i]* 6;
+            }
+            else if (centrality.size() >20 && centrality.size() <=30) {
+                graphicsCentrality[i] = centrality[i]* 5;
+            }
+            else {
+                 graphicsCentrality[i] = centrality[i];
+            }
+
+        }
+
+    }
+    else if (algorithm == "Betweenness Centrality") {
+        for(int i=0;i<centrality.size();i++){
+            if(centrality[i]==0){
+                graphicsCentrality[i]=20;
+            }
+            else {
+                graphicsCentrality[i] = (centrality[i]+10) *3;
+            }
+        }
+    }
+    else{
+        for(int i=0;i<centrality.size();i++){
+            if(max <0.05)
+                graphicsCentrality[i] =centrality[i]* 2500;
+            else if(max < 0.1)
+                graphicsCentrality[i] =centrality[i]* 400;
+            else if(max < 0.2)
+                graphicsCentrality[i] =centrality[i]* 300;
+            else if(max < 0.3)
+                graphicsCentrality[i] =centrality[i]* 200;
+            else if(max <0.5)
+                graphicsCentrality[i] =centrality[i]* 100;
+            else if(max < 1)
+                graphicsCentrality[i] =centrality[i]* 50;
+            else if(max < 5)
+                graphicsCentrality[i] =centrality[i]* 10;
+            else if(max < 10)
+                graphicsCentrality[i] =centrality[i]* 7;
+            else if(max < 20)
+                graphicsCentrality[i] =centrality[i]* 4;
+            else if(max < 30)
+                graphicsCentrality[i] =centrality[i]* 3;
+            else
+                graphicsCentrality[i] = centrality[i];
+        }
+    }
+
+    //adding nodes
+
+
+    for(int i=0;i<adjacencyList.size();i++){
+        Node * node;
+        QString tooltiptext;
+        if(centrality[i]==max){
+            node  = new Node(this,graphicsCentrality[i],true);
+            tooltiptext = "<html><body><h4>Node No.:"+ QString::number(i)  +"</h4>"
+                                 "<h4>Node Centerality:" + QString ::number(centrality[i]) + "</h4>"
+                                  "<h4>Is Max: True </h4></body></html>";
+        }
+
+        else
+        {
+         node = new Node(this,graphicsCentrality[i],false);
+         tooltiptext = "<html><body><h4>Node No.:"+ QString::number(i)  +"</h4>"
+                              "<h4>Node Centerality:" + QString ::number(centrality[i]) + "</h4>"
+                              "<h4>Is Max: False </h4></body></html>";
+        }
+
+        Nodes.push_back(node);
+        scene->addItem(node);
+
+
+        Nodes[i]->QGraphicsItem::setToolTip(tooltiptext);
+    }
+
+    //adding edges
+
+
+    for(int i=0;i<adjacencyList.size();i++){
+        QList<QPair<int, float>> ::iterator it;
+        for(it=adjacencyList[i].begin(); it!=adjacencyList[i].end() ;it++){
+            Edge * edge = new Edge(Nodes[i], Nodes[it->first]);
+            scene->addItem(edge);
+            Edges.push_back(edge);
+        }
+    }
+    shuffle();
+
+}
 
 //! [2]
 void Graphics::itemMoved()
@@ -106,6 +198,8 @@ void Graphics::itemMoved()
     if (!timerId)
         timerId = startTimer(1000 / 25);
 }
+
+
 //! [2]
 
 //! [3]
@@ -202,7 +296,7 @@ void Graphics::drawBackground(QPainter *painter, const QRectF &rect)
     QRectF textRect(sceneRect.left() + 4, sceneRect.top() + 4,
                     sceneRect.width() - 4, sceneRect.height() - 4);
     QString message(tr("Click and drag the nodes around, and zoom with the mouse "
-                       "wheel or the '+' and '-' keys"));
+                       "wheel or the '+' and '-' keys, Hover on Nodes to see its details"));
 
     QFont font = painter->font();
     font.setBold(true);
@@ -230,7 +324,7 @@ void Graphics::shuffle()
 {
     foreach (QGraphicsItem *item, scene->items()) {
         if (qgraphicsitem_cast<Node *>(item))
-            item->setPos(-150 + QRandomGenerator::global()->bounded(300), -150 + QRandomGenerator::global()->bounded(300));
+            item->setPos(-150 + QRandomGenerator::global()->bounded(1200), -150 + QRandomGenerator::global()->bounded(1200));
     }
 }
 
@@ -243,3 +337,4 @@ void Graphics::zoomOut()
 {
     scaleView(1 / qreal(1.2));
 }
+

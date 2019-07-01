@@ -54,7 +54,8 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 
-class Node;
+
+class Node;class Edge;
 
 //! [0]
 class Graphics : public QGraphicsView
@@ -65,6 +66,7 @@ public:
     Graphics(QWidget *parent = 0);
 
     void itemMoved();
+    void drawNodes(QVector<QList<QPair<int,float>>> adjacencyList,QVector<float> centrality,QString algorithm);
 
 public slots:
     void shuffle();
@@ -85,6 +87,9 @@ private:
     int timerId;
     Node *centerNode;
     QGraphicsScene *scene;
+    QVector<float> graphicsCentrality;
+    QVector<Node *> Nodes;
+    QVector<Edge *> Edges;
 };
 //! [0]
 

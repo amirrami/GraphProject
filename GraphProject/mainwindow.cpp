@@ -19,7 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("Social Network Analysis");
     mainPalette->setColor(QPalette::Active,QPalette::Window,Qt::white);
     this->setPalette(*mainPalette);
-    this->setFixedSize(400,150);
     InitUI();
 }
 
@@ -32,18 +31,13 @@ void MainWindow::InitUI()
 {
 
     //init graph layout
-    Graph = new Graphics(this);
-    Graph->setStyleSheet("border:0px;");
-    Graph->setVisible(true);
-    graphicsLayout = new QHBoxLayout;
-    graphicsLayout->addWidget(Graph);
 
     //init input layout
     inputLayout = new QHBoxLayout;
     InitFisrtPage();
     mainLayout = new QHBoxLayout;
     mainLayout->addItem(inputLayout);
-    mainLayout->addItem(graphicsLayout);
+
 
     //adding main layout to central widget of window
     centralWidget = new QWidget(this);
@@ -87,9 +81,7 @@ void MainWindow::InitFisrtPage(){
 
     firstInputPage->setContentsMargins(10,10,10,10);
     firstInputPage->setSpacing(10);
-
     inputLayout->addItem(firstInputPage);
-    QWidget::showMaximized();
     QObject::connect(browseButton,SIGNAL(clicked()),this,SLOT(browseButtonPressed()));
     QObject::connect(RunButton,SIGNAL(clicked()),this,SLOT(runAlgorithmPressed()));
 
@@ -165,6 +157,7 @@ void MainWindow::browseButtonPressed()
         }
 
     }
+    file.close();
 
 }
 
@@ -172,19 +165,30 @@ void MainWindow::runAlgorithmPressed()
 {
     if(algorithm->currentText()=="Degree Centrality"){
         DegreeCenter centralityAlgorithm(adjacencyMatrix,adjacencyList,numberOfEdges);
-        centrality.resize(numberOfNodes);
-        centralityAlgorithm.getCentrality(centrality);
+        Graph = new Graphics(0);
+        Graph->show();
+        Graph->drawNodes(adjacencyList,centralityAlgorithm.my_data,"Degree Centrality");
+        adjacencyMatrix.clear();
+        adjacencyList.clear();
+        fileName->setText("");
     }
     else if (algorithm->currentText()=="Closeness Centrality") {
         ClosenessCenter centralityAlgorithm(adjacencyMatrix,adjacencyList,numberOfEdges);
-        centrality.resize(numberOfNodes);
-        centralityAlgorithm.getCentrality(centrality);
+        Graph = new Graphics(0);
+        Graph->show();
+        Graph->drawNodes(adjacencyList,centralityAlgorithm.my_data,"Closeness Centrality");
+        adjacencyMatrix.clear();
+        adjacencyList.clear();
+        fileName->setText("");
     }
     else if (algorithm->currentText()=="Betweenness Centrality") {
         betweennessCenter centralityAlgorithm(adjacencyMatrix,adjacencyList,numberOfEdges);
-        centrality.resize(numberOfNodes);
-        centralityAlgorithm.getCentrality(centrality);
-
+        Graph = new Graphics(0);
+        Graph->show();
+        Graph->drawNodes(adjacencyList,centralityAlgorithm.my_data,"Betweenness Centrality");
+        adjacencyMatrix.clear();
+        adjacencyList.clear();
+        fileName->setText("");
 
     }
 }

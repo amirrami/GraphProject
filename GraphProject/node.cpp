@@ -58,14 +58,15 @@
 #include <QStyleOption>
 
 //! [0]
-Node::Node(Graphics *graphWidget)
+Node::Node(Graphics *graphWidget, float centralit,bool IsMax)
     : graph(graphWidget)
 {
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
     setCacheMode(DeviceCoordinateCache);
     setZValue(5);
-    centrality=70;
+    centrality=centralit;
+    max=IsMax;
 
 }
 //! [0]
@@ -106,8 +107,8 @@ void Node::calculateForces()
         qreal dy = vec.y();
         double l = 2.0 * (dx * dx + dy * dy);
         if (l > 0) {
-            xvel += (dx * 1000.0) / l;
-            yvel += (dy * 1000.0) / l;
+            xvel += (dx * 300.0) / l;
+            yvel += (dy * 300.0) / l;
         }
     }
 //! [3]
@@ -180,15 +181,29 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->drawEllipse(-7, -7, centrality, centrality);
 
     QRadialGradient gradient(-3, -3, centrality);
-    if (option->state & QStyle::State_Sunken) {
-        gradient.setCenter(3, 3);
-        gradient.setFocalPoint(3, 3);
-        gradient.setColorAt(1, QColor(Qt::yellow).light(120));
-        gradient.setColorAt(0, QColor(Qt::darkYellow).light(120));
-    } else {
-        gradient.setColorAt(0, Qt::yellow);
-        gradient.setColorAt(1, Qt::darkYellow);
+    if(max){
+        if (option->state & QStyle::State_Sunken) {
+            gradient.setCenter(3, 3);
+            gradient.setFocalPoint(3, 3);
+            gradient.setColorAt(1, QColor(Qt::gray).light(120));
+            gradient.setColorAt(0, QColor(Qt::black).light(120));
+        } else {
+            gradient.setColorAt(0, Qt::gray);
+            gradient.setColorAt(1, Qt::black);
+        }
     }
+    else {
+        if (option->state & QStyle::State_Sunken) {
+            gradient.setCenter(3, 3);
+            gradient.setFocalPoint(3, 3);
+            gradient.setColorAt(1, QColor(Qt::yellow).light(120));
+            gradient.setColorAt(0, QColor(Qt::darkYellow).light(120));
+        } else {
+            gradient.setColorAt(0, Qt::yellow);
+            gradient.setColorAt(1, Qt::darkYellow);
+        }
+    }
+
     painter->setBrush(gradient);
 
     painter->setPen(QPen(Qt::black, 0));

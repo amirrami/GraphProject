@@ -85,8 +85,20 @@ void Edge::adjust()
 {
     if (!source || !dest)
         return;
-
-    QLineF line(mapFromItem(source, source->getCentrality()/3, source->getCentrality()/3), mapFromItem(dest, dest->getCentrality()/3, dest->getCentrality()/3));
+    int startDivisor=3,destDivisor=3;
+    if(source->getCentrality()<=20)
+        startDivisor=5;
+    else if(source->getCentrality()>20 &&source->getCentrality()<=50)
+        startDivisor=4;
+    else if(source->getCentrality()>50)
+        startDivisor=3;
+    if(dest->getCentrality()<=20)
+        destDivisor=5;
+    else if(dest->getCentrality()>20 &&dest->getCentrality()<=50)
+        destDivisor=4;
+    else if(dest->getCentrality()>50)
+        destDivisor=3;
+    QLineF line(mapFromItem(source, source->getCentrality()/startDivisor, source->getCentrality()/startDivisor), mapFromItem(dest, dest->getCentrality()/destDivisor, dest->getCentrality()/destDivisor));
     qreal length = line.length();
 
     prepareGeometryChange();
@@ -130,7 +142,8 @@ void Edge::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 
 //! [5]
     // Draw the line itself
-    painter->setPen(QPen(Qt::black, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    int penWidth =2;
+    painter->setPen(QPen(Qt::black, penWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     painter->drawLine(line);
 //! [5]
 

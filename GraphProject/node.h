@@ -66,7 +66,7 @@ QT_END_NAMESPACE
 class Node : public QGraphicsItem
 {
 public:
-    Node(Graphics *graphWidget);
+    Node(Graphics *graphWidget,float centrality,bool IsMax);
 
     void addEdge(Edge *edge);
     QList<Edge *> edges() const;
@@ -93,6 +93,7 @@ private:
     QPointF newPos;
     Graphics *graph;
     float centrality;
+    bool max;
 };
 //! [0]
 
